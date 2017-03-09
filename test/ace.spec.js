@@ -284,6 +284,29 @@ describe('uiAce', function () {
         //
         expect(scope.foo).toBe('baz');
       });
+
+        it('should update the ng-model always', function () {
+            $compile('<div ui-ace ng-model="foo"">')(scope);
+
+            scope.$apply('foo = "bar"');
+            expect(_ace.getSession().getValue()).toEqual('bar');
+
+            /**
+             * When the editor is instructed to change its value via session.setValue, it triggers two changes,
+             * the first is a "clear" change where it removes the prior value,
+             * the second includes the new value.
+             * In cases where the change happens to replace the exact same value,
+             * as in the user types "foo", then selects "foo" from an autocomplete menu,
+             * ui-ace would have erroneously updated ngModel to the "cleared" value (empty string),
+             * but never replaced it with the user's intended value.
+             * Triggering setValue here twice in a row easily replicates this behavior.
+             */
+            _ace.getSession().setValue('baz');
+            scope.$apply();
+            _ace.getSession().setValue('baz');
+            scope.$apply();
+            expect(scope.foo).toEqual('baz');
+        });
     });
 
     describe('when the model is undefined/null', function () {
