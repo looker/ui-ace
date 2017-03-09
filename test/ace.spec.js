@@ -284,6 +284,23 @@ describe('uiAce', function () {
         //
         expect(scope.foo).toBe('baz');
       });
+
+        it('should update the ng-model always', function () {
+            $compile('<div ui-ace ng-model="foo"">')(scope);
+
+            scope.$apply('foo = "bar"');
+            expect(_ace.getSession().getValue()).toEqual('bar');
+
+            // because of the way the editor works - removing the old text and then inserting the new text,
+            // and the fact that it schedules the actual change to the model
+            // we need to ensure that when the editor's text is 'changed' to the same thing,
+            // it updates correctly and doesn't wipe out the text
+            _ace.getSession().setValue('baz');
+            scope.$apply();
+            _ace.getSession().setValue('baz');
+            scope.$apply();
+            expect(scope.foo).toEqual('baz');
+        });
     });
 
     describe('when the model is undefined/null', function () {
