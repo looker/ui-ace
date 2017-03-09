@@ -291,10 +291,16 @@ describe('uiAce', function () {
             scope.$apply('foo = "bar"');
             expect(_ace.getSession().getValue()).toEqual('bar');
 
-            // because of the way the editor works - removing the old text and then inserting the new text,
-            // and the fact that it schedules the actual change to the model
-            // we need to ensure that when the editor's text is 'changed' to the same thing,
-            // it updates correctly and doesn't wipe out the text
+            /**
+             * When the editor is instructed to change its value via session.setValue, it triggers two changes,
+             * the first is a "clear" change where it removes the prior value,
+             * the second includes the new value.
+             * In cases where the change happens to replace the exact same value,
+             * as in the user types "foo", then selects "foo" from an autocomplete menu,
+             * ui-ace would have erroneously updated ngModel to the "cleared" value (empty string),
+             * but never replaced it with the user's intended value.
+             * Triggering setValue here twice in a row easily replicates this behavior.
+             */
             _ace.getSession().setValue('baz');
             scope.$apply();
             _ace.getSession().setValue('baz');

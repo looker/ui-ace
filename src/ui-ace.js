@@ -224,13 +224,11 @@ angular.module('ui.ace', [])
             return function (e) {
               var newValue = session.getValue();
 
-              if (ngModel && //newValue !== ngModel.$viewValue &&
+              if (ngModel &&
                   // HACK make sure to only trigger the apply outside of the
                   // digest loop 'cause ACE is actually using this callback
                   // for any text transformation !
                   !scope.$$phase && !scope.$root.$$phase) {
-                //LOOKER CHANGE - removed: `newValue !== ngModel.$viewValue &&`
-                //from the above if statement, it was causing a bug with autocomplete
                 scope.$evalAsync(function () {
                   ngModel.$setViewValue(newValue);
                 });
